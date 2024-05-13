@@ -13,6 +13,8 @@ struct ContentView: View {
         QuizTopic(title: "Marvel Super Heroes", description: "Explore Marvel's universe.", questions: [], iconName: "sparkles"),
         QuizTopic(title: "Science", description: "Discover the wonders of science.", questions: [],iconName: "thermometer.sun")
     ]
+    
+    @State private var showSettingAlert = false
 
     var body: some View {
            NavigationView {
@@ -29,6 +31,18 @@ struct ContentView: View {
                }
                .background(Color.white) // Ensuring the background of the VStack is also white
                .navigationTitle("Quiz Topics")
+               .toolbar{
+                   ToolbarItem(placement: .navigationBarTrailing) {
+                       Button(action: {
+                           showSettingAlert = true
+                       }, label: {
+                           Image(systemName: "gear")
+                       })
+                   }
+               }
+               .alert(isPresented:$showSettingAlert, content: {
+                   Alert(title: Text("Settings"), message: Text("Click button for setting"), dismissButton: .default(Text("OK")))
+               })
            }
            .background(Color.white) // Making sure the NavigationView's background is white as well
        }
