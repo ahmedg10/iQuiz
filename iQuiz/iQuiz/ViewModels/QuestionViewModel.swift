@@ -5,7 +5,60 @@
 
 import Foundation
 import SwiftUI
-import Combine
+
+
+class QuizViewModel: ObservableObject {
+    @Published var questions: [QuizQuestion]
+    @Published var currQuestionIndex = 0
+    @Published var isAnswerCorrect: Bool? = nil //nil because we aren't given if the answer is correct or not
+    @Published var score = 0
+    @Published var showResult = false
+    @Published var quizFinished = false
+    @Published var selectedAnswer: String? = nil  // Add this line
+
+    
+    init(questions: [QuizQuestion]){
+        self.questions = questions
+    }
+    
+    var currentQuestion : QuizQuestion  {
+        questions[currQuestionIndex]
+    }
+    
+    func submitAnswer(_ answer: String) {
+            selectedAnswer = answer  // Ensure this is set when an answer is submitted
+
+            isAnswerCorrect = answer == currentQuestion.correctAnswer
+            if isAnswerCorrect == true {
+                score += 1
+            }
+            showResult = true
+        }
+
+        func nextQuestion() {
+            if currQuestionIndex < questions.count - 1 {
+                currQuestionIndex += 1
+                isAnswerCorrect = nil
+                showResult = false
+                selectedAnswer = nil  // Reset for the next question
+
+            } else {
+                quizFinished = true  // Indicate that the quiz is completed
+            }
+        }
+    
+    func resetQuiz() {
+            currQuestionIndex = 0
+            score = 0
+        selectedAnswer = nil
+
+            isAnswerCorrect = nil
+            showResult = false
+            quizFinished = false
+        }
+    
+    
+}
 
 //class MainViewModel: ObservableObject {
 //    @Published var quizViewModels: [QuizViewModel] = []

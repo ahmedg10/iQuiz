@@ -9,10 +9,58 @@ import SwiftUI
 
 struct ContentView: View {
     let topics: [QuizTopic] = [
-        QuizTopic(title: "Mathematics", description: "Challenge your math skills.", questions: [], iconName: "plusminus.circle"),
-        QuizTopic(title: "Marvel Super Heroes", description: "Explore Marvel's universe.", questions: [], iconName: "sparkles"),
-        QuizTopic(title: "Science", description: "Discover the wonders of science.", questions: [],iconName: "thermometer.sun")
-    ]
+         QuizTopic(
+             title: "Mathematics",
+             description: "Challenge your math skills.",
+             questions: [
+                 QuizQuestion(
+                     question: "What is 2 + 2?",
+                     options: ["3", "4", "5", "6"],
+                     correctAnswer: "4"
+                 ),
+                 QuizQuestion(
+                     question: "What is the square root of 16?",
+                     options: ["3", "4", "5", "8"],
+                     correctAnswer: "4"
+                 )
+             ],
+             iconName: "plusminus.circle"
+         ),
+         QuizTopic(
+             title: "Marvel Super Heroes",
+             description: "Explore Marvel's universe.",
+             questions: [
+                 QuizQuestion(
+                     question: "Who is Tony Stark's superhero alter ego?",
+                     options: ["Iron Man", "Captain America", "Thor", "Hulk"],
+                     correctAnswer: "Iron Man"
+                 ),
+                 QuizQuestion(
+                     question: "What is Thor's hammer called?",
+                     options: ["Mjolnir", "Stormbreaker", "Aegis", "Excalibur"],
+                     correctAnswer: "Mjolnir"
+                 )
+             ],
+             iconName: "sparkles"
+         ),
+         QuizTopic(
+             title: "Science",
+             description: "Discover the wonders of science.",
+             questions: [
+                 QuizQuestion(
+                     question: "What is the chemical formula for water?",
+                     options: ["H2O", "CO2", "O2", "N2"],
+                     correctAnswer: "H2O"
+                 ),
+                 QuizQuestion(
+                     question: "What force keeps us on the ground?",
+                     options: ["Gravity", "Magnetism", "Friction", "Inertia"],
+                     correctAnswer: "Gravity"
+                 )
+             ],
+             iconName: "thermometer.sun"
+         )
+     ]
     
     @State private var showSettingAlert = false
 
@@ -21,7 +69,7 @@ struct ContentView: View {
                VStack {
                    Spacer()
                    List(topics) { topic in
-                       NavigationLink(destination: Text("Details for \(topic.title)")) {
+                       NavigationLink(destination: QuizView(viewModel: QuizViewModel(questions: topic.questions))) {
                            TopicRow(topic: topic)
                        }
                    }
