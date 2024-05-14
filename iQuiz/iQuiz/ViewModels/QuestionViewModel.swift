@@ -8,17 +8,69 @@ import SwiftUI
 
 
 class QuizViewModel: ObservableObject {
-    @Published var questions: [QuizQuestion]
     @Published var currQuestionIndex = 0
-    @Published var isAnswerCorrect: Bool? = nil //nil because we aren't given if the answer is correct or not
+    @Published var isAnswerCorrect: Bool?
     @Published var score = 0
     @Published var showResult = false
     @Published var quizFinished = false
-    @Published var selectedAnswer: String? = nil  // Add this line
+    @Published var selectedAnswer: String?
+    @Published var isErrorPresented = false
+    @Published var errorMessage = ""
+    @Published var showSettings = false
+    @Published var questions: [QuizQuestion] = []
+    @Published var topics: [QuizTopic] = []
+    @Published var currentURL: String {
+        didSet {
+            UserDefaults.standard.set(currentURL, forKey: "QuizDataURL")
+            fetchQuestions(urlString: currentURL)
+        }
+    }
 
-    
-    init(questions: [QuizQuestion]){
-        self.questions = questions
+    init(questions: [QuizQuestion] = []) {
+            self.questions = questions
+            if questions.isEmpty {
+                self.currentURL = UserDefaults.standard.string(forKey: "QuizDataURL") ?? "https://tednewardsandbox.site44.com/questions.json"
+                fetchQuestions(urlString: currentURL)
+            } else {
+                // If questions are provided, assume the quiz can start immediately
+                self.currentURL = ""
+            }
+        }
+
+    func fetchQuestions(urlString: String) {
+        NetworkManager.shared.downloadData(from: urlString) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let data):
+                    self?.decodeQuizData(data)
+                case .failure(let error):
+                    self?.errorMessage = "Error fetching questions: \(error.localizedDescription)"
+                    self?.isErrorPresented = true
+                }
+            }
+        }
+    }
+
+    private func decodeQuizData(_ data: Data) {
+        do {
+            var fetchedTopics = try JSONDecoder().decode([QuizTopic].self, from: data)
+            // Assign random icons if not from JSON
+            fetchedTopics = fetchedTopics.map { topic in
+                var updatedTopic = topic
+                updatedTopic.iconName = updatedTopic.iconName ?? randomIconName()
+                return updatedTopic
+            }
+            self.topics = fetchedTopics
+            self.questions = topics.flatMap { $0.questions }
+        } catch {
+            errorMessage = "Failed to decode quiz data: \(error.localizedDescription)"
+            isErrorPresented = true
+        }
+    }
+
+    private func randomIconName() -> String {
+        let icons = ["plusminus.circle", "sparkles", "flame", "leaf.arrow.triangle.circlepath"]
+        return icons.randomElement() ?? "circle"
     }
     
     var currentQuestion : QuizQuestion  {
@@ -26,14 +78,20 @@ class QuizViewModel: ObservableObject {
     }
     
     func submitAnswer(_ answer: String) {
-            selectedAnswer = answer  // Ensure this is set when an answer is submitted
+        selectedAnswer = answer  // Store the answer chosen by the user
 
-            isAnswerCorrect = answer == currentQuestion.correctAnswer
-            if isAnswerCorrect == true {
-                score += 1
-            }
-            showResult = true
+        // Convert the correct answer index from String to Int (assuming zero-based indexing from JSON)
+        if let correctAnswerIndex = Int(currentQuestion.answer),
+           let indexOfSelectedAnswer = currentQuestion.answers.firstIndex(of: answer),
+           correctAnswerIndex == indexOfSelectedAnswer {
+            isAnswerCorrect = true
+            score += 1  // Increment score if the answer is correct
+        } else {
+            isAnswerCorrect = false
         }
+
+        showResult = true  // Update the view to show the result
+    }
 
         func nextQuestion() {
             if currQuestionIndex < questions.count - 1 {

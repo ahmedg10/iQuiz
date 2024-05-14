@@ -12,12 +12,12 @@ struct QuestionView: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            Text(viewModel.currentQuestion.question)
+            Text(viewModel.currentQuestion.text)
                 .font(.title)
                 .padding()
 
             // Display options as buttons
-            ForEach(viewModel.currentQuestion.options, id: \.self) { option in
+            ForEach(viewModel.currentQuestion.answers, id: \.self) { option in
                 Button(action: {
                     viewModel.selectedAnswer = option  // Update selected answer on tap
                 }) {

@@ -8,17 +8,18 @@
 import Foundation
 import SwiftUI
 
-struct QuizTopic: Identifiable {
-    let id = UUID()
+struct QuizTopic: Identifiable, Decodable {
+    var id: UUID { UUID() }  // This provides a unique ID but does not decode from JSON
     let title: String
-    let description: String
+    let desc: String
     let questions: [QuizQuestion]
-    let iconName: String 
+    var iconName: String?  // Change this to var if you want to modify it later
+
 }
 
-struct QuizQuestion: Identifiable {
-    let id = UUID()
-    let question: String
-    let options: [String]
-    let correctAnswer: String
+struct QuizQuestion: Identifiable, Decodable {
+    var id: UUID { UUID() }  // Provides a unique ID for each question
+    let text: String
+    let answer: String  // This should be an index or identifier
+    let answers: [String]
 }
